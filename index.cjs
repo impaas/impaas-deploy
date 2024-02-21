@@ -1,6 +1,6 @@
-import axios from 'axios';
-import * as core from '@actions/core';
-import * as github from '@actions/github';
+const axios = require('axios');
+const core = require('@actions/core');
+const github = require('@actions/github');
 
 async function deployToImPaaS(appName, deploymentToken) {
   try {
@@ -20,11 +20,13 @@ async function deployToImPaaS(appName, deploymentToken) {
   }
 }
 
-try {
-  const appName = core.getInput('app-name');
-  const deploymentToken = core.getInput('deployment-token');
+(async () => {
+  try {
+    const appName = core.getInput('app-name');
+    const deploymentToken = core.getInput('deployment-token');
 
-  await deployToImPaaS(appName, deploymentToken);
-} catch (error) {
-  core.setFailed(error.message);
-}
+    await deployToImPaaS(appName, deploymentToken);
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+})();
