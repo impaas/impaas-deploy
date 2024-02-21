@@ -1,6 +1,6 @@
-const axios = require('axios');
-const core = require('@actions/core');
-const github = require('@actions/github');
+import axios from 'axios';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 
 async function deployToImPaaS(appName, deploymentToken) {
   try {
