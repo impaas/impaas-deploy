@@ -37536,7 +37536,7 @@ async function deployToImPaaS(appName, deploymentToken) {
     console.log('Deployment successful:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Deployment failed:', error.response.data);
+    console.error('Deployment failed:', error.response.data, appName, deploymentToken);
     throw error;
   }
 }
