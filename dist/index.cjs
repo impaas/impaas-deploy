@@ -37546,14 +37546,14 @@ async function deployFromDockerImage(appName, deploymentToken) {
     return response.data;
   } catch (error) {
     console.error('Deployment failed:', error.response.data, appName, deploymentToken);
-    throw error;
+    throw error;µ
   }
 }
 
 async function deployFromPlatform(appName, deploymentToken) {
   const terminalCommands = `
     curl -fsSL "https://tsuru.io/get" | bash;
-    tsuru target add http://impaas.uk -s;
+    tsuru target add impaas https://impaas.uk -s;
     TSURU_TOKEN=${deploymentToken} tsuru app deploy -a ${appName} .;
   `;
 
