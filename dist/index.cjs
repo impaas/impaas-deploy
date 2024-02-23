@@ -37553,9 +37553,8 @@ async function deployFromDockerImage(appName, deploymentToken) {
 async function deployFromPlatform(appName, deploymentToken) {
   const terminalCommands = `
     curl -fsSL "https://tsuru.io/get" | bash;
-    export TSURU_TOKEN=${deploymentToken};
     tsuru target add http://impaas.uk -s;
-    tsuru app deploy -a ${appName} .;
+    TSURU_TOKEN=${deploymentToken} tsuru app deploy -a ${appName} .;
   `;
 
   exec(terminalCommands, (error, stdout, stderr) => {
