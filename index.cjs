@@ -1,8 +1,9 @@
 const axios = require('axios');
 const core = require('@actions/core');
 const github = require('@actions/github');
+const exec = require('child_process');
 
-async function deployToImPaaS(appName, deploymentToken) {
+async function deployFromDockerImage(appName, deploymentToken) {
   try {
     const apiUrl = `http://impaas.uk/apps/${appName}/deploy`;
     const imageUrl = `ghcr.io/${github.context.repo.owner}/${github.context.repo.owner}/${github.context.repo.repo}:latest`;
@@ -20,14 +21,40 @@ async function deployToImPaaS(appName, deploymentToken) {
   }
 }
 
+async function deployFromPlatform(appName, deploymentToken) {
+  const terminalCommands = `
+    curl -fsSL "https://tsuru.io/get" | bash;
+    export TSURU_TOKEN=${deploymentToken};
+    tsuru target add http://impaas.uk -s;
+    tsuru app deploy -a ${appName} .;
+  `;
+
+  exec(terminalCommands, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+  });
+}
+
 (async () => {
   try {
     const appName = core.getInput('app-name');
     const deploymentToken = core.getInput('deployment-token');
-    // const appName = 'flask-demo-app';
-    // const deploymentToken = 'f5a768e7a09100f8d28eec7ba42d15d745ff3acd8a222b731a3dcd2c07f044b2';
+    const method = core.getInput('method');
 
-    await deployToImPaaS(appName, deploymentToken);
+    if (method === 'DOCKER_IMAGE') {
+      await deployFromDockerImage(appName, deploymentToken);
+    } else if (method === 'PLATFORM') {
+      await deployFromPlatform(appName, deploymentToken);
+    } else {
+      throw new Error(`Unknown method: ${method}`);
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
