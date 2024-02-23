@@ -37530,7 +37530,7 @@ var __webpack_exports__ = {};
 const axios = __nccwpck_require__(7437);
 const core = __nccwpck_require__(9935);
 const github = __nccwpck_require__(2835);
-const exec = __nccwpck_require__(2081);
+const { exec } = __nccwpck_require__(2081);
 
 async function deployFromDockerImage(appName, deploymentToken) {
   try {
