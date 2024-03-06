@@ -37532,7 +37532,7 @@ const core = __nccwpck_require__(9935);
 const github = __nccwpck_require__(2835);
 const { exec } = __nccwpck_require__(2081);
 
-async function deployFromDockerImage(appName, deploymentToken) {
+async function deployFromPublishedDockerImage(appName, deploymentToken) {
   try {
     const apiUrl = `http://impaas.uk/apps/${appName}/deploy`;
     const imageUrl = `ghcr.io/${github.context.repo.owner}/${github.context.repo.owner}/${github.context.repo.repo}:latest`;
@@ -37559,17 +37559,28 @@ async function deployFromPlatform(appName, deploymentToken) {
 
   exec(terminalCommands, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error: ${error.message}`);
+      core.setFailed(`Deployment failed with error: ${error.message}`);
       return;
     }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
+    console.info(`Deployment successful: ${stdout}`);
   });
 }
 
+async function buildAndPushDockerImage(appName, deploymentToken) {
+  const terminalCommands = `
+    curl -fsSL "https://tsuru.io/get" | bash;
+    tsuru target add impaas https://impaas.uk -s;
+    TSURU_TOKEN=${deploymentToken} tsuru app deploy -a ${appName} --dockerfile .;
+  `;
+
+  exec(terminalCommands, (error, stdout, stderr) => {
+    if (error) {
+      core.setFailed(`Docker image build and push failed with error: ${error.message}`);
+      return;
+    }
+    core.info(`Docker image build and push successful: ${stdout}`);
+  });
+}
 (async () => {
   try {
     const appName = core.getInput('app-name');
@@ -37577,10 +37588,13 @@ async function deployFromPlatform(appName, deploymentToken) {
     const method = core.getInput('method');
 
     if (method === 'DOCKER_IMAGE') {
-      await deployFromDockerImage(appName, deploymentToken);
+      await deployFromPublishedDockerImage(appName, deploymentToken);
     } else if (method === 'PLATFORM') {
       await deployFromPlatform(appName, deploymentToken);
-    } else {
+    } else if (method === 'DOCKER_BUILD') {
+      await buildAndPushDockerImage(appName, deploymentToken);
+    }
+    else {
       throw new Error(`Unknown method: ${method}`);
     }
   } catch (error) {
