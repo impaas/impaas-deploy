@@ -13,11 +13,11 @@ async function deployFromPublishedDockerImage(appName, deploymentToken) {
         Authorization: `Bearer ${deploymentToken}`
       }
     });
-    console.log('Deployment successful:', response.data);
+    core.info('Deployment successful:', response.data);
+    core.info(`App available at ${appName}.impaas.uk`)
     return response.data;
   } catch (error) {
-    console.error('Deployment failed:', error.response.data, appName, deploymentToken);
-    throw error;µ
+    core.setFailed('Deployment failed:', error.response.data, appName, deploymentToken);
   }
 }
 
@@ -33,7 +33,8 @@ async function deployFromPlatform(appName, deploymentToken) {
       core.setFailed(`Deployment failed with error: ${error.message}`);
       return;
     }
-    console.info(`Deployment successful: ${stdout}`);
+    core.info(`Deployment successful: ${stdout}`);
+    core.info(`App available at ${appName}.impaas.uk`)
   });
 }
 
@@ -50,6 +51,7 @@ async function buildAndPushDockerImage(appName, deploymentToken) {
       return;
     }
     core.info(`Docker image build and push successful: ${stdout}`);
+    core.info(`App available at ${appName}.impaas.uk`)
   });
 }
 (async () => {
