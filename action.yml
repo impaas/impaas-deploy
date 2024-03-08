@@ -1,0 +1,14 @@
+name: 'Deploy App to ImPaaS'
+description: 'Deploy an app to ImPaaS'
+inputs:
+  app-name:
+    description: 'Name of the app to deploy'
+    required: true
+  deployment-token:
+    description: 'Token for deployment authorization'
+    required: true
+  method:
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/index.cjs'
